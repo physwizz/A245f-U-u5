@@ -45,10 +45,7 @@ lego_module_list = [
 ]
 
 lego_dtbo_list = [
-"a24_eur_open_beni_6.12_w00_r06.dtbo",
-"a24_eur_open_beni_6.12_w00_r05.dtbo",
-"a24_eur_open_beni_6.12_w00_r04.dtbo",
-"a24_eur_open_beni_6.12_w00_r03.dtbo",
-"a24_eur_open_beni_6.12_w00_r00.dtbo"
+"a24_ltn_open_beni_6.12_w00_r06.dtbo",
+"a24_ltn_open_beni_6.12_w00_r00.dtbo"
 ]
 lego_model = 'a24'

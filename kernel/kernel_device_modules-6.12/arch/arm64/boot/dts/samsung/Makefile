@@ -1,8 +1,5 @@
-dtb-y += a24_eur_open_beni_6.12_w00_r06.dtbo
-dtb-y += a24_eur_open_beni_6.12_w00_r05.dtbo
-dtb-y += a24_eur_open_beni_6.12_w00_r04.dtbo
-dtb-y += a24_eur_open_beni_6.12_w00_r03.dtbo
-dtb-y += a24_eur_open_beni_6.12_w00_r00.dtbo
+dtb-y += a24_ltn_open_beni_6.12_w00_r06.dtbo
+dtb-y += a24_ltn_open_beni_6.12_w00_r00.dtbo
 
 # SPDX-License-Identifier: GPL-2.0
 
