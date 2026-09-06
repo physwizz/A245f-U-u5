@@ -62,6 +62,24 @@ static void sec_mm_migration_target_bypass(void *data,
 		*bypass = true;
 }
 
+#ifdef CONFIG_SEC_MM_CUSTOMIZE_ZONE_PAGESET
+static void sec_mm_customize_zone_pageset(void *data, struct zone *zone,
+		int *new_high_min, int *new_high_max, int *new_batch)
+{
+	long nr_pages;
+	int batch;
+
+	nr_pages = max_t(long, 0, zone_managed_pages(zone) - zone_cma_pages(zone));
+	if (!nr_pages)
+		return;
+
+	/* MTK v5.10 model policy */
+	batch = (nr_pages >> 12) >= 43 ? 63 : 15;
+	*new_batch = batch;
+	*new_high_min = *new_high_max = batch * 6;
+}
+#endif
+
 #if CONFIG_MMAP_READAROUND_LIMIT == 0
 unsigned int mmap_readaround_limit = VM_READAHEAD_PAGES;
 #else
@@ -150,6 +168,10 @@ void init_sec_mm_tune(void)
 			sec_mm_shrink_slab_bypass, NULL);
 	register_trace_android_vh_migration_target_bypass(
 			sec_mm_migration_target_bypass, NULL);
+#ifdef CONFIG_SEC_MM_CUSTOMIZE_ZONE_PAGESET
+	register_trace_android_vh_mm_customize_zone_pageset(
+			sec_mm_customize_zone_pageset, NULL);
+#endif
 	register_trace_android_vh_rmqueue_pcplist_override_batch(
 			sec_mm_override_batch, NULL);
 	register_trace_android_vh_tune_mmap_readaround(
@@ -181,6 +203,10 @@ void exit_sec_mm_tune(void)
 			sec_mm_shrink_slab_bypass, NULL);
 	unregister_trace_android_vh_migration_target_bypass(
 			sec_mm_migration_target_bypass, NULL);
+#ifdef CONFIG_SEC_MM_CUSTOMIZE_ZONE_PAGESET
+	unregister_trace_android_vh_mm_customize_zone_pageset(
+			sec_mm_customize_zone_pageset, NULL);
+#endif
 	unregister_trace_android_vh_rmqueue_pcplist_override_batch(
 			sec_mm_override_batch, NULL);
 	unregister_trace_android_vh_tune_mmap_readaround(

@@ -19,6 +19,13 @@ config SEC_MM_DUMP_DMABUF_TASKS
 	help
 	  Print dmabuf usage information.
 
+config SEC_MM_CUSTOMIZE_ZONE_PAGESET
+	bool "use custom pcp policy"
+	default y
+	help
+	  With this feature enabled, pcp batch/high will follow kernel v5.10
+	  policy.
+
 config MMAP_READAROUND_LIMIT
 	int "Limit mmap readaround upperbound"
 	default 16

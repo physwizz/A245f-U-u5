@@ -6158,6 +6158,9 @@ static void zone_set_pageset_high_and_batch(struct zone *zone, int cpu_online)
 	    zone->pageset_batch == new_batch)
 		return;
 
+	trace_android_vh_mm_customize_zone_pageset(zone, &new_high_min,
+						   &new_high_max, &new_batch);
+
 	zone->pageset_high_min = new_high_min;
 	zone->pageset_high_max = new_high_max;
 	zone->pageset_batch = new_batch;

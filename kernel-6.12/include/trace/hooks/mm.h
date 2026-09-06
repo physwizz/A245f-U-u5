@@ -509,6 +509,9 @@ DECLARE_HOOK(android_vh_gcma_cc_allow_nonworkingset,
 DECLARE_HOOK(android_vh_gcma_cc_store_page_bypass,
 	TP_PROTO(bool *bypass),
 	TP_ARGS(bypass));
+DECLARE_HOOK(android_vh_mm_customize_zone_pageset,
+	TP_PROTO(struct zone *zone, int *new_high_min, int *new_high_max, int *new_batch),
+	TP_ARGS(zone, new_high_min, new_high_max, new_batch));
 #endif /* _TRACE_HOOK_MM_H */
 
 /* This part must be outside protection */
