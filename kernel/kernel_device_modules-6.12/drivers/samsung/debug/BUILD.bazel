@@ -1,0 +1,55 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sec_debug",
+    hdrs = glob(["**/*.h"]),
+    includes = ["."],
+    srcs = [
+        "sec_debug_base.c",
+        "sec_debug_log.c",
+        "sec_debug_pmsg.c",
+        "sec_debug_init_log.c",
+        "sec_debug_auto_comment.c",
+        "sec_debug_hist.c",
+        "printk_ringbuffer.c",
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_debug.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec_extra_info",
+    srcs = [
+        "sec_debug_extra_info.c",
+        "sec_debug_hw_param.c",
+    ],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_extra_info.ko",
+)
+
+
+
+

@@ -1,0 +1,68 @@
+# Copyright 2024 The Bazel Authors. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+load("//java:repositories.bzl", "JAVA_TOOLS_CONFIG", "REMOTE_JDK_CONFIGS")
+load(":check_remotejdk_configs_match.bzl", "validate_configs")
+
+sh_test(
+    name = "check_remote_jdk_configs_test",
+    srcs = ["check_remote_jdk_configs.sh"],
+    args = [
+        ",".join([
+            config.name,
+            config.urls[0],
+            config.urls[1] if len(config.urls) > 1 else "",
+            config.sha256,
+            config.strip_prefix,
+        ])
+        for configs in REMOTE_JDK_CONFIGS.values()
+        for config in configs
+    ],
+)
+
+sh_test(
+    name = "check_remote_java_tools_configs_test",
+    srcs = ["check_remote_java_tools_configs.sh"],
+    args = [
+        ",".join([
+            name,
+            config["mirror_url"],
+            config["github_url"],
+            config["sha"],
+        ])
+        for name, config in JAVA_TOOLS_CONFIG["artifacts"].items()
+    ],
+)
+
+diff_test(
+    name = "docs_up_to_date_test",
+    failure_message = """
+    Docs are no longer up to date. Regenerate them by running:
+
+    bazel build //java/docs:rules_docs && \
+    cp bazel-bin/java/docs/rules_docs.out java/docs/rules.md
+    """,
+    file1 = "//java/docs:rules.md",
+    file2 = "//java/docs:rules_docs",
+)
+
+validate_configs()
+
+starlark_doc_extract(
+    name = "proxy_bzl_graph",
+    src = "@compatibility_proxy//:proxy.bzl",
+    deps = ["@compatibility_proxy//:proxy_bzl"],
+)

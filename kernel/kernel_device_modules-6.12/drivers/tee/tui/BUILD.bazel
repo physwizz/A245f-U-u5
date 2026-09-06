@@ -1,0 +1,78 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "**/Makefile",
+        "**/Kbuild",
+        "**/*.c",
+        "**/*.h",
+    ]),
+)
+
+tuihw_local_defines = [
+    "DEBUG=1",
+    "TUI_ENABLE_DISPLAY=1",
+    "USE_TEE_CLIENT_API=1",
+]
+
+define_mgk_ddk_ko(
+    name = "tuihw",
+    srcs = [
+        "main.c",
+        "stui_hal.h",
+        "stui_ioctl.h",
+        "stui_inf.h",
+        "stui_core.c",
+        "stui_core.h",
+        "platforms/mediatek/stui_hal_display.c",
+        "platforms/mediatek/stui_hal_touch.c",
+        "platforms/mediatek/tui_platform.h",
+    ],
+    conditional_srcs = {
+        "CONFIG_SAMSUNG_TUI_LOWLEVEL": {
+            True: [
+                "iwd_agent.c",
+                "iwd_agent.h",
+                "tuill_defs.h"
+            ],
+        },
+    },
+    local_defines = tuihw_local_defines,
+    includes = [
+        ".",
+    ],
+    ko_deps = [
+        ":tuihw-inf",
+        "//kernel_device_modules-{}/drivers/tee/tzdev:tzdev".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/dma-buf/heaps:system_heap".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/dma-buf/heaps:mtk_sec_heap".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/trusted_mem:trusted_mem".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/gpu/drm/mediatek/mediatek_v2/v1:mediatek_drm_v1".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/input/sec_input:sec_common_fn".format(kernel_version),
+    ],
+)
+
+define_mgk_ddk_ko(
+    name = "tuihw-inf",
+    srcs = ["stui_inf.c"],
+    hdrs = ["stui_inf.h"],
+    local_defines = tuihw_local_defines,
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/tee/tzdev:tzdev".format(kernel_version),
+    ],
+)

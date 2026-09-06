@@ -1,0 +1,36 @@
+module(
+    name = "bazel_central_registry",
+    version = "0.0.0",
+    compatibility_level = 1,
+)
+
+bazel_dep(name = "aspect_rules_js", version = "2.1.0")
+bazel_dep(name = "buildozer", version = "7.1.2")
+bazel_dep(name = "rules_python", version = "0.40.0")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    is_default = True,
+    python_version = "3.11",
+)
+use_repo(python, "python_3_11", "python_versions")
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pip",
+    python_version = "3.11",
+    requirements_lock = "//tools:requirements_lock.txt",
+)
+use_repo(pip, "pip")
+
+npm = use_extension("@aspect_rules_js//npm:extensions.bzl", "npm", dev_dependency = True)
+
+npm.npm_translate_lock(
+    name = "npm",
+    pnpm_lock = "//tools:pnpm-lock.yaml",
+)
+
+buildozer_binary = use_extension("@buildozer//:buildozer_binary.bzl", "buildozer_binary")
+use_repo(buildozer_binary, "buildozer_binary")
+
+use_repo(npm, "npm")

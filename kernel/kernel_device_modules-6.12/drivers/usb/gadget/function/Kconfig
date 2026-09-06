@@ -1,0 +1,18 @@
+config USB_CONFIGFS_F_DM
+        tristate "DM gadget"
+        depends on USB_CONFIGFS
+        help
+          USB gadget DM(Diagnosis Monitor) support
+
+config USB_CONFIGFS_F_CONN_GADGET
+	tristate "Conn gadget function"
+	depends on USB_CONFIGFS
+	help
+	  USB Sidesync function support
+
+config USB_CONFIGFS_F_SS_MON_GADGET
+	tristate "F_SAMSUNG gadget"
+	depends on USB_CONFIGFS
+	help
+	 Driver for control to Samsung Usb device layer
+	 For Samung working scenario and saving debug log, etc

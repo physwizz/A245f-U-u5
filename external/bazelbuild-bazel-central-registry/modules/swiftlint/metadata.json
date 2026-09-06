@@ -1,0 +1,27 @@
+{
+    "homepage": "https://github.com/realm/SwiftLint",
+    "maintainers": [
+        {
+            "email": "jp@jpsim.com",
+            "github": "jpsim",
+            "name": "JP Simard"
+        }
+    ],
+    "repository": [
+        "github:realm/SwiftLint"
+    ],
+    "versions": [
+        "0.51.0",
+        "0.52.1",
+        "0.52.2",
+        "0.52.3",
+        "0.52.4",
+        "0.53.0",
+        "0.54.0",
+        "0.55.1",
+        "0.55.1.1",
+        "0.56.2",
+        "0.57.0"
+    ],
+    "yanked_versions": {}
+}

@@ -1,0 +1,33 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "mfd_sm5714",
+    srcs = [
+        "sm5714_core.c",
+		"sm5714-irq.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+		"//kernel_device_modules-{}/drivers/usb/typec/common:pdic_notifier_module".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/notify:usb_notify_layer".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "mfd_sm5714.ko",
+)   

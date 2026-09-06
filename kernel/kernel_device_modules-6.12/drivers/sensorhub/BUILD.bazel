@@ -1,0 +1,209 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "shub",
+    srcs = [
+        "comm/shub_comm.c",
+        "comm/shub_iio.c",
+        "comm/shub_kfifo_buf.c",
+        "comm/misc/shub_misc.c",
+        "comm/misc/shub_batch.c",
+        "comm/misc/shub_injection.c",
+        "comm/misc/shub_scontext.c",
+        "debug/shub_debug.c",
+        "debug/shub_debug_sysfs.c",
+        "debug/shub_sensor_dump.c",
+        "debug/shub_system_checker.c",
+        "debug/shub_dump.c",
+        "factory/shub_factory.c",
+        "factory/accelerometer/accelerometer_factory.c",
+        "factory/flip_cover_detector/flip_cover_detector_factory.c",
+        "factory/gyroscope/gyroscope_factory.c",
+        "factory/gyroscope/gyroscope_icm42605m_factory.c",
+        "factory/gyroscope/gyroscope_lsm6dsl_factory.c",
+        "factory/gyroscope/gyroscope_lsm6dsotr_factory.c",
+        "factory/gyroscope/gyroscope_lsm6dsvtr_factory.c",
+        "factory/gyroscope/gyroscope_icm42632m_factory.c",
+        "factory/light/light_factory.c",
+        "factory/magnetometer/magnetometer_factory.c",
+        "factory/magnetometer/magnetometer_ak09918c_factory.c",
+        "factory/magnetometer/magnetometer_mmc5633_factory.c",
+        "factory/magnetometer/magnetometer_yas539_factory.c",
+        "factory/magnetometer/magnetometer_mxg4300s_factory.c",
+        "factory/pressure/pressure_factory.c",
+        "factory/pressure/pressure_bmp580_factory.c",
+        "factory/pressure/pressure_lps22hh_factory.c",
+        "factory/pressure/pressure_lps22df_factory.c",
+        "factory/pressure/pressure_lps25h_factory.c",
+        "factory/proximity/proximity_factory.c",
+        "factory/proximity/proximity_gp2ap110s_factory.c",
+        "factory/proximity/proximity_stk3x6x_factory.c",
+        "factory/proximity/proximity_stk3328_factory.c",
+        "factory/proximity/proximity_tmd4912_factory.c",
+        "factory/proximity/proximity_stk3391x_factory.c",
+        "factory/proximity/proximity_stk33512_factory.c",
+        "factory/proximity/proximity_stk3afx_factory.c",
+        "factory/proximity/proximity_tmd3725_factory.c",
+        "others/shub_motor_callback.c",
+        "others/shub_panel.c",
+        "others/shub_pogo.c",
+        "others/shub_aois.c",
+        "sensor/accelerometer.c",
+        "sensor/gyroscope.c",
+        "sensor/gyroscope_uncal.c",
+        "sensor/magnetometer.c",
+        "sensor/magnetometer_uncal.c",
+        "sensor/flip_cover_detector.c",
+        "sensor/light.c",
+        "sensor/light_cct.c",
+        "sensor/light_autobrightness.c",
+        "sensor/light_seamless.c",
+        "sensor/light_ir.c",
+        "sensor/led_cover_event.c",
+        "sensor/pressure.c",
+        "sensor/scontext.c",
+        "sensor/step.c",
+        "sensor/proximity.c",
+        "sensor/proximity_raw.c",
+        "sensor/proximity_calibration.c",
+        "sensor/motion.c",
+        "sensor/super.c",
+        "sensor/hub_debugger.c",
+        "sensor/pocket_mode.c",
+        "sensor/device_orientation.c",
+        "sensor/sar_backoff_motion.c",
+        "sensor/pogo_request_handler.c",
+        "sensor/aois.c",
+        "sensor/rotation_vector.c",
+        "sensor/game_rotation_vector.c",
+        "sensor/drop_classifier.c",
+        "sensor/physical_sensor/accelerometer/accelerometer_icm42605m.c",
+        "sensor/physical_sensor/accelerometer/accelerometer_icm42632m.c",
+        "sensor/physical_sensor/accelerometer/accelerometer_lis2dlc12.c",
+        "sensor/physical_sensor/accelerometer/accelerometer_lsm6dsl.c",
+        "sensor/physical_sensor/accelerometer/accelerometer_lsm6dsotr.c",
+        "sensor/physical_sensor/accelerometer/accelerometer_lsm6dsvtr.c",
+        "sensor/physical_sensor/gyroscope/gyroscope_icm42605m.c",
+        "sensor/physical_sensor/gyroscope/gyroscope_icm42632m.c",
+        "sensor/physical_sensor/gyroscope/gyroscope_lsm6dsl.c",
+        "sensor/physical_sensor/gyroscope/gyroscope_lsm6dsotr.c",
+        "sensor/physical_sensor/gyroscope/gyroscope_lsm6dsvtr.c",
+        "sensor/physical_sensor/magnetometer/magnetometer_ak09918c.c",
+        "sensor/physical_sensor/magnetometer/magnetometer_mmc5633.c",
+        "sensor/physical_sensor/magnetometer/magnetometer_yas539.c",
+        "sensor/physical_sensor/magnetometer/magnetometer_mxg4300s.c",
+        "sensor/physical_sensor/proximity/proximity_stk3x6x.c",
+        "sensor/physical_sensor/proximity/proximity_gp2ap110s.c",
+        "sensor/physical_sensor/proximity/proximity_stk3328.c",
+        "sensor/physical_sensor/proximity/proximity_tmd4912.c",
+        "sensor/physical_sensor/proximity/proximity_stk33512.c",
+        "sensor/physical_sensor/proximity/proximity_stk3391x.c",
+        "sensor/physical_sensor/proximity/proximity_stk3afx.c",
+        "sensor/physical_sensor/proximity/proximity_tmd3725.c",
+        "sensor/physical_sensor/light/light_stk_common.c",
+        "sensor/physical_sensor/pressure/pressure_bmp580.c",
+        "sensor/physical_sensor/pressure/pressure_lps22hh.c",
+        "sensor/physical_sensor/pressure/pressure_lps22df.c",
+        "sensorhub/shub_device.c",
+        "sensorhub/shub_sysfs.c",
+        "sensorhub/shub_device_wrapper.c",
+        "sensorhub/shub_firmware.c",
+        "sensormanager/shub_sensor_manager.c",
+        "sensormanager/shub_sensor_sysfs.c",
+        "sensormanager/shub_sensor.c",
+        "utility/shub_utility.c",
+        "utility/shub_wakelock.c",
+        "utility/shub_dev_core.c",
+        "utility/shub_wait_event.c",
+        "utility/shub_file_manager.c",
+        "vendor/shub_mtk.c",
+    ],
+
+
+    hdrs = glob([
+        "comm/*.h",
+        "comm/misc/*.h",
+        "debug/*.h",
+        "factory/*.h",
+        "factory/accelerometer/*.h",
+        "factory/flip_cover_detector/*.h",
+        "factory/gyroscope/*.h",
+        "factory/light/*.h",
+        "factory/magnetometer/*.h",
+        "factory/pressure/*.h",
+        "factory/proximity/*.h",
+        "others/*.h",
+        "sensor/*.h",
+        "sensor/physical_sensor/magnetometer/*.h",
+        "sensor/physical_sensor/proximity/*.h",
+        "sensor/physical_sensor/light/*.h",
+        "sensor/physical_sensor/pressure/*.h",
+        "sensorhub/*.h",
+        "sensormanager/*.h",
+        "utility/*.h",
+        "vendor/*.h"
+    ]),
+
+    header_deps = [
+        "//kernel_device_modules-{}/drivers/misc/mediatek/scp/include:scp_public_headers".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/scp/rv:ddk_public_headers".format(kernel_version),
+    ],
+
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/sensorhub:sensors_core".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/scp/rv:scp".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/soc/mediatek:mtk_tinysys_ipi".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/vibrator/common:sec_vibrator".format(kernel_version),
+    ],
+
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/include/",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/scp/include/",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/scp/rv/"
+    ],
+
+    out = "shub.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sensors_core",
+    srcs = [
+        "utility/sensor_core.c"
+    ],
+
+    hdrs = glob(["utility/*.h"]),
+
+    header_deps = [
+        "//kernel_device_modules-{}/drivers/misc/mediatek/scp/include:scp_public_headers".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/scp/rv:ddk_public_headers".format(kernel_version),
+    ],
+
+    ko_deps = [
+    ],
+
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/include/",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/scp/include/",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/scp/rv/"
+    ],
+
+    out = "utility/sensor_core.ko",
+)

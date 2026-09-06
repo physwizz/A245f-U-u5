@@ -1,0 +1,18 @@
+{
+    "homepage": "https://github.com/jmillikin/rules_m4",
+    "maintainers": [
+        {
+            "email": "john@john-millikin.com",
+            "github": "jmillikin",
+            "name": "John Millikin"
+        }
+    ],
+    "repository": [
+        "github:jmillikin/rules_m4"
+    ],
+    "versions": [
+        "0.2.3",
+        "0.2.4"
+    ],
+    "yanked_versions": {}
+}

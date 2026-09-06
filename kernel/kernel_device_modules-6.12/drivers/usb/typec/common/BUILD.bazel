@@ -1,0 +1,45 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "pdic_notifier_module",
+    srcs = [
+        "pdic_notifier.c",
+		"pdic_sysfs.c",
+		"pdic_core.c",
+		"pdic_misc.c",
+		"pdic_param.c",
+    ],
+    conditional_srcs = {
+        "CONFIG_PDIC_POLICY":{
+            True:[
+                "pdic_policy.c",
+            ],
+        },
+    },
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+		"//kernel_device_modules-{}/drivers/staging/android/switch:sec_switch_class".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/notify:usb_notify_layer".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/typec/manager:if_cb_manager_module".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "pdic_notifier_module.ko",
+)   

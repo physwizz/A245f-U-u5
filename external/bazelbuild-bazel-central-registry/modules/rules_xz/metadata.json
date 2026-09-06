@@ -1,0 +1,20 @@
+{
+  "homepage": "https://gitlab.arm.com/bazel/rules_xz",
+  "repository": [
+    "https://gitlab.arm.com/bazel/rules_xz"
+  ],
+  "versions": [
+    "1.0.0-beta.1",
+    "1.0.0-beta.2",
+    "1.0.0-beta.3",
+    "1.0.0-beta.5",
+    "1.0.0-beta.6"
+  ],
+  "maintainers": [
+    {
+      "email": "matthew.clarkson@arm.com",
+      "name": "Matt Clarkson",
+      "github": "mattyclarkson"
+    }
+  ]
+}

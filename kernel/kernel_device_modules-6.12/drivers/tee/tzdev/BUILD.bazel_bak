@@ -1,0 +1,213 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+filegroup(
+    name = "ddk_makefile",
+    srcs = glob([
+        "**/*.c",
+        "**/*.h",
+        "**/Kbuild",
+        "**/Kbuild.*",
+        "**/Makefile",
+        "**/Makefile.*",
+    ]),
+)
+
+TEEGRIS_VERSION = "4"
+
+filegroup(
+    name = "tzdev_source",
+    srcs = [
+        # Core
+        "core/cdev.c",
+        "core/cred.c",
+        "core/event.c",
+        "core/iwio.c",
+        "core/iwservice.c",
+        "core/iwsock.c",
+        "core/kthread_pool.c",
+        "core/log.c",
+        "core/mem.c",
+        "core/notifier.c",
+        "core/ree_time.c",
+        "core/sysdep.c",
+        "core/tzdev.c",
+        "core/uiwsock.c",
+        "core/umem.c",
+        "test/tee_test.c",
+
+        # Lib
+        "lib/circ_buf.c",
+        "lib/circ_buf_packet.c",
+
+        # TEE client API
+        "teec/context.c",
+        "teec/misc.c",
+        "teec/session.c",
+        "teec/shared_memory.c",
+    ] + select({
+        # Core (Conditional)
+        "//build/kernel/kleaf:kconfig_tzlog": ["core/iwlog.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzdev_deploy_tzar": ["core/deploy_tzar.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_msm_scm": [
+            "core/qc_platform.c",
+            "core/qc_clocks.c",
+        ],
+        "//conditions:default": [
+            "core/platform.c",
+        ],
+    }) + select({
+        # Extensions
+        "//build/kernel/kleaf:kconfig_tzdev_boost": ["extensions/boost.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzdev_cpufreq_transition": ["extensions/cpufreq_trans.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzdev_hotplug": ["extensions/hotplug.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzirs": ["extensions/irs.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_nwfs": ["extensions/fsdev.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_scma": ["extensions/scma.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_ion_fd2phys": [
+            "extensions/ion_fd2phys_v0.c",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        # Debug
+        "//build/kernel/kleaf:kconfig_tzprofiler": ["debug/profiler.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_boot_log": ["debug/iw_boot_log.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_panic_dump": ["debug/panic_dump.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_pmf": ["debug/pmf.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzdev_tracing": ["debug/trace.c"],
+        "//conditions:default": [],
+    }) + select({
+        # Tests
+        "//build/kernel/kleaf:kconfig_efuse_test": ["tests/efuse_test.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzasc_test": ["tests/tzasc_test.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tzpc_test": ["tests/tzpc_test.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_chtest": ["tests/tz_chtest.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_clk_test_helper": ["tests/tz_clk_test_helper.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_memdump_test": ["tests/tz_memdump_test.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_mmap_test": ["tests/tz_mmap_test.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_printk_test": ["tests/tz_printk_test.c"],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_tee_kernel_api_test": [
+            "tests/tz_tee_kernel_api_test.c",
+            "tests/teec/tee_test.c",
+            "tests/teec/tee_test_send_ta.c",
+            "tests/teec/tee_test_cancellation.c",
+            "tests/teec/tee_test_null_args.c",
+            "tests/teec/tee_test_shared_ref.c",
+            "tests/teec/tee_test_sleep.c",
+        ],
+        "//conditions:default": [],
+    }) + select({
+        "//build/kernel/kleaf:kconfig_tz_scma_test": ["tests/tz_scma_test.c"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:private"],
+)
+
+ddk_headers(
+    name = "teegris_local_hdrs",
+    hdrs = glob([
+        "{}/**/*.h".format(TEEGRIS_VERSION),
+    ]),
+    includes = [
+        "{}".format(TEEGRIS_VERSION),
+    ],
+    visibility = ["//visibility:private"],
+)
+
+ddk_headers(
+    name = "teegris_public_hdrs",
+    hdrs = glob([
+        "{}/include/tzdev/*.h".format(TEEGRIS_VERSION),
+    ]),
+    includes = [
+        "{}/include".format(TEEGRIS_VERSION),
+        "{}/include/tzdev".format(TEEGRIS_VERSION),
+    ],
+)
+
+teegris_local_defines = (
+    [] +
+    select({
+        "//build/kernel/kleaf:kconfig_samsung_gki_kernel": [
+            "ANDROID_GKI_VFS_EXPORT_ONLY=VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver",
+            "CONFIG_SAMSUNG_GKI_KERNEL",
+        ],
+        "//conditions:default": [],
+    }) +
+    select({
+        "//build/kernel/kleaf:kconfig_tzdev_deploy_tzar": [
+            '_STR(s)="\\#s"',
+            'KBUILD_SRC=_STR($(KBUILD_SRC))',
+        ],
+        "//conditions:default": [],
+    })
+)
+
+define_mgk_ddk_ko(
+    name = "tzdev",
+    srcs = [":tzdev_source"],
+    out = "{}/tzdev.ko".format(TEEGRIS_VERSION),
+    hdrs = [
+		":teegris_public_hdrs",
+		":teegris_local_hdrs",
+	],
+    header_deps = [
+		":teegris_public_hdrs",
+		":teegris_local_hdrs"
+	],
+    local_defines = teegris_local_defines,
+)

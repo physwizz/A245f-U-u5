@@ -1,0 +1,37 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+
+define_mgk_ddk_ko(
+    name = "sm5714-charger",
+    srcs = [
+        "sm5714_charger.c", "sm5714_charger_oper.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/battery/common:sec-battery".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/common:sec_pd".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/core:sb-core".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/mfd/sm/sm5714:mfd_sm5714".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/notify:usb_notify_layer".format(kernel_version),
+        #"//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sm5714-charger.ko",
+)

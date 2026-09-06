@@ -1,0 +1,125 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sec_pd",
+    srcs = [
+        "sec_pd.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/battery/core:sb-core".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/typec/manager:usb_typec_manager".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_pd.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sb_wireless",
+    srcs = [
+        "sb_wireless.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/battery/core:sb-core".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sb_wireless.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec-direct-charger",
+    srcs = [
+        "sec_direct_charger.c", "sb_pass_through.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/battery/common:sec-battery".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/common:sec_pd".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/core:sb-core".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec-direct-charger.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec-battery",
+    srcs = [
+        "sec_charging_modprobe.c", "sec_battery.c", "sec_battery_vote.c", "sec_battery_thermal.c",
+        "sec_battery_sysfs.c", "sec_battery_dt.c", "sec_battery_ttf.c", "sec_adc.c", "sec_cisd.c", "sb_full_soc.c"
+    ],
+    hdrs = glob(["**/*.h"]),
+
+    conditional_srcs = {
+        "CONFIG_ENG_BATTERY_CONCEPT":{
+            True:[
+                "sb_checklist_app.c",
+            ],
+        },
+        "CONFIG_STEP_CHARGING":{
+            True:[
+                "sec_step_charging.c",
+            ],
+        },
+        "CONFIG_WIRELESS_AUTH":{
+            True:[
+                "sec_battery_misc.c",
+            ],
+        },
+        "CONFIG_WIRELESS_CHARGING":{
+            True:[
+                "sec_battery_wc.c",
+            ],
+        },
+        "CONFIG_WIRELESS_TX_MODE":{
+            True:[
+                "sb_tx.c",
+                "sb_tx.h",
+            ],
+        },
+        "CONFIG_BATTERY_LOGGING":{
+            True:[
+                "battery_logger.c",
+                "sb_batt_dump.c",
+                "sb_batt_dump.h",
+            ],
+        },
+    },
+
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/battery/common:sec_pd".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/core:sb-core".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/muic/common:common_muic".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/common/vbus_notifier:vbus_notifier_module".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/typec/manager:usb_typec_manager".format(kernel_version),
+        #"//kernel_device_modules-{}/drivers/input/misc/hall:hall_ic_notifier_module".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec-battery.ko",
+)

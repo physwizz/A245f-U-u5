@@ -1,0 +1,57 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+
+define_mgk_ddk_ko(
+    name = "sb-core",
+    srcs = [
+        "sb_core.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+
+    conditional_srcs = {
+        "CONFIG_SB_PQUEUE":{
+            True:[
+                "sb_pqueue.c",
+            ],
+        },
+        "CONFIG_SB_NOTIFY":{
+            True:[
+                "sb_notify.c",
+            ],
+        },
+        "CONFIG_SB_SYSFS":{
+            True:[
+                "sb_sysfs.c",
+            ],
+        },
+        "CONFIG_SB_VOTE":{
+            True:[
+                "sb_vote.c",
+            ],
+        },
+    },
+
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sb-core.ko",
+)
+

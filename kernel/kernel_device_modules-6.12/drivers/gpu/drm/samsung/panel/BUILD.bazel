@@ -1,0 +1,164 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "mcd_panel",                     
+    srcs = [                               
+        "timenval.c",
+        "abd.c",
+        "util.c",
+        "panel_lib.c",
+        "maptbl.c",
+        "panel_sequence.c",
+        "panel_expression.c",
+        "panel_condition.c",
+        "panel_property.c",
+        "panel_delay.c",
+        "panel_packet.c",
+        "panel_resource.c",
+        "panel_dump.c",
+        "panel_config.c",
+        "panel.c",
+        "panel_bl.c",
+        "dimming.c",
+        "panel_gpio.c",
+        "panel_regulator.c",
+        "panel_drv_ioctl.c",
+        "panel_drv.c",
+        "panel_irc.c",
+        "panel_vrr.c",
+        "panel_power_ctrl.c",
+        "panel_obj.c",
+        "panel_function.c",
+        "panel_firmware.c",
+        "panel_mutex.c"
+    ],
+    hdrs = glob(["**/*.h"]),
+    conditional_srcs = {                   
+        "CONFIG_USDM_PANEL_DISPLAY_MODE":{
+            True:[
+                "panel_modes.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_SYSFS":{
+            True:[
+                "sysfs.c",
+            ]
+        },
+        "CONFIG_USDM_MDNIE": {
+            True: [
+                "mdnie.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_DEBUG": {
+            True: [
+                "panel_debug.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_SELF_DISPLAY": {
+            True: [
+                "aod/aod_drv.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_FREQ_HOP": {
+            True: [
+                "panel_freq_hop.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_MAFPC": {
+            True: [
+                "mafpc/mafpc_drv.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_DPUI": {
+            True: [
+                "dpui.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_COPR": {
+            True: [
+                "copr.c",
+            ]
+        },
+        "CONFIG_USDM_POC_SPI": {
+            True: [
+                "panel_poc.c",
+                "panel_spi.c",
+            ]
+        },
+        "CONFIG_USDM_BLIC_I2C": {
+            True: [
+                "panel_i2c.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_BLIC": {
+            True: [
+                "panel_blic.c",
+            ]
+        },
+        "CONFIG_USDM_LPD_AUTO_BR": {
+            True: [
+                "panel_lpd_cmd.c",
+            ]
+        },
+        "CONFIG_USDM_ADAPTIVE_MIPI": {
+            True: [
+                "adaptive_mipi.c",
+            ]
+        },
+        "CONFIG_USDM_SDP_ADAPTIVE_MIPI": {
+            True: [
+                "sdp_adaptive_mipi.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_TESTMODE": {
+            True: [
+                "panel_testmode.c",
+            ]
+        },
+        "CONFIG_USDM_PANEL_JSON": {
+            True: [
+                "ezop/jsmn.c",
+                "ezop/json.c",
+                "ezop/json_writer.c",
+                "ezop/json_reader.c",
+                "ezop/panel_json.c",
+            ]
+        },
+    },
+    includes = [
+        ".",
+        "$(DEVICE_MODULES_PATH)"
+    ],
+    header_deps = [
+     #   "//kernel_device_modules-{}/drivers/sec_panel_notifier_v2:sec-panel-notifier-v2".format(kernel_version),
+     #   "//kernel_device_modules-{}/drivers/input/sec_input:sec_input_notifier".format(kernel_version),
+     #   "//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+     #   "//kernel_device_modules-{}/bsp/class:sec_class".format(kernel_version),
+    ],
+    ko_deps = [
+	"//kernel_device_modules-{}/drivers/sec_panel_notifier_v2:sec-panel-notifier-v2".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/gpu/drm/mediatek/mediatek_v2/v1:mediatek_drm_v1".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/input/sec_input:sec_input_notifier".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/drb:drb".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    out = "mcd-panel.ko",
+    copts = ["-Wno-implicit-fallthrough"],
+)

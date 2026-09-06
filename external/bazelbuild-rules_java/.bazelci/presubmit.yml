@@ -1,0 +1,137 @@
+---
+build_targets: &build_targets
+  - "//..."
+  - "@remote_java_tools//java_tools/..."
+  # can't build @remote_java_tools_X repos for other platforms
+  - "-//toolchains/..."
+  # TODO: re-enable docs after moving them out of https://bazel.build/reference/be/java
+  - "-//java/docs/..."
+  - "-//test:docs_up_to_date_test"
+
+build_targets_bazel6: &build_targets_bazel6
+  - "//:all"
+  - "@remote_java_tools//java_tools/..."
+  - "//examples/..."
+
+build_targets_integration: &build_targets_integration
+  - "//..."
+  - "//:bin_deploy.jar"
+
+test_targets: &test_targets
+  - "//test/..."
+  - "//java/test/..."
+  # TODO: re-enable docs after moving them out of https://bazel.build/reference/be/java
+  - "-//test:docs_up_to_date_test"
+
+test_targets_bazel6: &test_targets_bazel6
+  - "//java/test/..."
+
+test_target_integration: &test_target_integration
+  - "//:MyTest"
+
+flags_workspace_integration: &flags_workspace_integration
+  - "--noenable_bzlmod"
+  - "--enable_workspace"
+
+buildifier: latest
+
+tasks:
+# TODO: add config for 8.0.0 once released
+# Bazel 7.x
+  ubuntu2004:
+    name: "Bazel 7.x"
+    bazel: "7.4.0"
+    build_targets: *build_targets
+    test_targets: *test_targets
+  ubuntu2004_integration:
+    name: "Bazel 7.x Integration"
+    bazel: "7.4.0"
+    platform: ubuntu2004
+    working_directory: "test/repo"
+    shell_commands:
+      - sh setup.sh
+    build_targets: *build_targets_integration
+    test_targets: *test_target_integration
+  ubuntu2004_integration_workspace:
+    name: "Bazel 7.x Integration (WORKSPACE)"
+    bazel: "7.4.0"
+    platform: ubuntu2004
+    working_directory: "test/repo"
+    shell_commands:
+      - sh setup.sh
+    build_targets: *build_targets_integration
+    build_flags: *flags_workspace_integration
+    test_targets: *test_target_integration
+    test_flags: *flags_workspace_integration
+  macos:
+    name: "Bazel 7.x"
+    bazel: "7.4.0"
+    build_targets: *build_targets
+  windows:
+    name: "Bazel 7.x"
+    bazel: "7.4.0"
+    build_targets: *build_targets
+# Bazel@HEAD
+  ubuntu2004_head:
+    name: "Bazel@HEAD"
+    bazel: last_green
+    platform: ubuntu2004
+    build_targets: *build_targets
+    test_targets: *test_targets
+  ubuntu2004_integration_head:
+    name: "Bazel@HEAD Integration"
+    bazel: last_green
+    platform: ubuntu2004
+    working_directory: "test/repo"
+    shell_commands:
+      - sh setup.sh
+    build_targets: *build_targets_integration
+    test_targets: *test_target_integration
+  ubuntu2004_integration_head_workspace:
+    name: "Bazel@HEAD Integration (WORKSPACE)"
+    bazel: "last_green"
+    platform: ubuntu2004
+    working_directory: "test/repo"
+    shell_commands:
+      - sh setup.sh
+    build_targets: *build_targets_integration
+    build_flags: *flags_workspace_integration
+    test_targets: *test_target_integration
+    test_flags: *flags_workspace_integration
+  macos_head:
+    name: "Bazel@HEAD"
+    bazel: last_green
+    platform: macos
+    build_targets: *build_targets
+  windows_head:
+    name: "Bazel@HEAD"
+    bazel: last_green
+    platform: windows
+    build_targets: *build_targets
+
+# Bazel 6.x
+  ubuntu2004_bazel6:
+    name: "Bazel 6.x"
+    bazel: 6.4.0
+    platform: ubuntu2004
+    build_targets: *build_targets_bazel6
+    test_targets: *test_targets_bazel6
+  ubuntu2004_integration_bazel6:
+    name: "Bazel 6.x Integration"
+    bazel: 6.4.0
+    platform: ubuntu2004
+    working_directory: "test/repo"
+    shell_commands:
+    - sh setup.sh
+    build_targets: *build_targets_integration
+    test_targets: *test_target_integration
+  macos_bazel6:
+    name: "Bazel 6.x"
+    bazel: 6.4.0
+    platform: macos
+    build_targets: *build_targets_bazel6
+  windows_bazel6:
+    name: "Bazel 6.x"
+    bazel: 6.4.0
+    platform: windows
+    build_targets: *build_targets_bazel6

@@ -1,0 +1,35 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+
+define_mgk_ddk_ko(
+    name = "hl7132-charger",
+    srcs = [
+        "hl7132_charger.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/battery/common:sec-battery".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/common:sec-direct-charger".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/common:sec_pd".format(kernel_version),
+        #"//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "hl7132-charger.ko",
+)

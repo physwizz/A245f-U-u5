@@ -1,0 +1,58 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "usb_typec_manager",
+    srcs = [
+        "usb_typec_manager_notifier.c",
+    ],
+    conditional_srcs = {
+        "CONFIG_USB_HW_PARAM":{
+            True:[
+                "usb_typec_manager_hwparam.c",
+            ],
+        },
+    },
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+		"//kernel_device_modules-{}/drivers/usb/typec/common:pdic_notifier_module".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/notify:usb_notify_layer".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/common/vbus_notifier:vbus_notifier_module".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/muic/common:common_muic".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "usb_typec_manager.ko",
+)   
+
+define_mgk_ddk_ko(
+    name = "if_cb_manager_module",
+    srcs = [
+        "if_cb_manager.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "if_cb_manager_module.ko",
+)   

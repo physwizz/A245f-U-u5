@@ -1,0 +1,198 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+filegroup(
+    name = "ddk_makefile",
+    srcs = glob([
+        "**/*.c",
+        "**/*.h",
+        "**/Kbuild",
+        "**/Kbuild.*",
+        "**/Makefile",
+        "**/Makefile.*",
+	]),
+)
+
+TEEGRIS_VERSION = "4"
+
+filegroup(
+    name = "tzdev_source",
+    srcs = [
+        # Core
+        "{}/core/cdev.c".format(TEEGRIS_VERSION),
+        "{}/core/cred.c".format(TEEGRIS_VERSION),
+        "{}/core/event.c".format(TEEGRIS_VERSION),
+        "{}/core/iwio.c".format(TEEGRIS_VERSION),
+        "{}/core/iwservice.c".format(TEEGRIS_VERSION),
+        "{}/core/iwsock.c".format(TEEGRIS_VERSION),
+        "{}/core/kthread_pool.c".format(TEEGRIS_VERSION),
+        "{}/core/log.c".format(TEEGRIS_VERSION),
+        "{}/core/mem.c".format(TEEGRIS_VERSION),
+        "{}/core/notifier.c".format(TEEGRIS_VERSION),
+        "{}/core/ree_time.c".format(TEEGRIS_VERSION),
+        "{}/core/sysdep.c".format(TEEGRIS_VERSION),
+        "{}/core/tzdev.c".format(TEEGRIS_VERSION),
+        "{}/core/uiwsock.c".format(TEEGRIS_VERSION),
+        "{}/core/umem.c".format(TEEGRIS_VERSION),
+        "{}/core/subsystem.c".format(TEEGRIS_VERSION),
+        "{}/test/tee_test.c".format(TEEGRIS_VERSION),
+
+        # Lib
+        "{}/lib/circ_buf.c".format(TEEGRIS_VERSION),
+        "{}/lib/circ_buf_packet.c".format(TEEGRIS_VERSION),
+
+        # TEE client API
+        "{}/teec/context.c".format(TEEGRIS_VERSION),
+        "{}/teec/misc.c".format(TEEGRIS_VERSION),
+        "{}/teec/session.c".format(TEEGRIS_VERSION),
+        "{}/teec/shared_memory.c".format(TEEGRIS_VERSION),
+    ],
+    visibility = ["//visibility:private"],
+)
+
+ddk_headers(
+    name = "teegris_local_hdrs",
+    hdrs = glob([
+        "{}/**/*.h".format(TEEGRIS_VERSION),
+    ]),
+    includes = [
+        "{}".format(TEEGRIS_VERSION),
+    ],
+    visibility = ["//visibility:private"],
+)
+
+ddk_headers(
+    name = "teegris_public_hdrs",
+    hdrs = glob([
+        "{}/**/*.h".format(TEEGRIS_VERSION),
+    ]),
+    includes = [
+        "{}".format(TEEGRIS_VERSION),
+        "{}/include".format(TEEGRIS_VERSION),
+        "{}/include/tzdev".format(TEEGRIS_VERSION),
+    ],
+)
+
+teegris_local_defines = [
+	"ANDROID_GKI_VFS_EXPORT_ONLY=VFS_internal_I_am_really_a_filesystem_and_am_NOT_a_driver",
+	"CONFIG_SAMSUNG_GKI_KERNEL",
+]
+
+define_mgk_ddk_ko(
+    name = "tzdev",
+    srcs = [":tzdev_source"],
+    out = "{}/tzdev.ko".format(TEEGRIS_VERSION),
+    hdrs = [
+		":teegris_public_hdrs",
+	],
+    header_deps = [
+		":teegris_local_hdrs"
+	],
+    local_defines = teegris_local_defines,
+	
+	conditional_srcs = {
+        "CONFIG_TZLOG": {
+            True: ["{}/core/iwlog.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZDEV_DEPLOY_TZAR": {
+            True: ["{}/core/deploy_tzar.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_MSM_SCM": {
+            True: [
+                "{}/core/qc_platform.c".format(TEEGRIS_VERSION),
+                "{}/core/qc_clocks.c".format(TEEGRIS_VERSION),
+            ],
+            False: [
+                "{}/core/platform.c".format(TEEGRIS_VERSION),
+            ],
+        },
+        "CONFIG_TZDEV_BOOST": {
+            True: ["{}/extensions/boost.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZDEV_CPUFREQ_TRANSITION": {
+            True: ["{}/extensions/cpufreq_trans.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZDEV_HOTPLUG": {
+            True: ["{}/extensions/hotplug.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZIRS": {
+            True: ["{}/extensions/irs.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_NWFS": {
+            True: ["{}/extensions/fsdev.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_SCMA": {
+            True: ["{}/extensions/scma.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_ION_FD2PHYS": {
+            True: ["{}/extensions/ion_fd2phys_v0.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZPROFILER": {
+            True: ["{}/debug/profiler.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_BOOT_LOG": {
+            True: ["{}/debug/iw_boot_log.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_PANIC_DUMP": {
+            True: ["{}/debug/panic_dump.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_PMF": {
+            True: ["{}/debug/pmf.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZDEV_TRACING": {
+            True: ["{}/debug/trace.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_EFUSE_TEST": {
+            True: ["{}/tests/efuse_test.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZASC_TEST": {
+            True: ["{}/tests/tzasc_test.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZPC_TEST": {
+            True: ["{}/tests/tzpc_test.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_CHTEST": {
+            True: ["{}/tests/tz_chtest.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_CLK_TEST_HELPER": {
+            True: ["{}/tests/tz_clk_test_helper.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_MEMDUMP_TEST": {
+            True: ["{}/tests/tz_memdump_test.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_MMAP_TEST": {
+            True: ["{}/tests/tz_mmap_test.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_PRINTK_TEST": {
+            True: ["{}/tests/tz_printk_test.c".format(TEEGRIS_VERSION)],
+        },
+        "CONFIG_TZ_TEE_KERNEL_API_TEST": {
+            True: [
+                "{}/tests/tz_tee_kernel_api_test.c".format(TEEGRIS_VERSION),
+                "{}/tests/teec/tee_test.c".format(TEEGRIS_VERSION),
+                "{}/tests/teec/tee_test_send_ta.c".format(TEEGRIS_VERSION),
+                "{}/tests/teec/tee_test_cancellation.c".format(TEEGRIS_VERSION),
+                "{}/tests/teec/tee_test_null_args.c".format(TEEGRIS_VERSION),
+                "{}/tests/teec/tee_test_shared_ref.c".format(TEEGRIS_VERSION),
+                "{}/tests/teec/tee_test_sleep.c".format(TEEGRIS_VERSION),
+            ],
+        },
+        "CONFIG_TZ_SCMA_TEST": {
+            True: ["{}/tests/tz_scma_test.c".format(TEEGRIS_VERSION)],
+        },
+    },
+)

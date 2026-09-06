@@ -1,0 +1,14 @@
+config ZRAM_EXT
+	bool
+	depends on ZRAM_WRITEBACK && SEC_MM
+	default y
+	help
+	  This feature supports RAM Plus.
+
+config ZRAM_PERF_STAT
+	bool
+	depends on ZRAM_EXT
+	default y
+	help
+	  With this feature, read/write performance of RAM Plus will
+	  be shown via /sys/block/zram0/perf_stat.

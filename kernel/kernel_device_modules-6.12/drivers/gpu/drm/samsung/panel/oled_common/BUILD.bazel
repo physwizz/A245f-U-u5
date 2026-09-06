@@ -1,0 +1,49 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "usdm-panel-oled-common",
+    srcs = [
+        "oled_function.c",
+        "oled_property.c",
+        "oled_common.c",
+        "oled_common_dump.c",
+        "oled_common_cond.c",
+    ],
+    conditional_srcs = {                   
+        "CONFIG_USDM_PANEL_SELF_DISPLAY":{
+            True:[
+                "oled_common_aod.c",
+            ]
+        },
+        "CONFIG_USDM_MDNIE":{
+            True:[
+                "oled_common_mdnie.c",
+            ]
+        },
+    },
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+    	"//kernel_device_modules-{}/drivers/gpu/drm/samsung/panel:mcd_panel".format(kernel_version),
+    	"//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+    copts = [
+    ],
+    out = "usdm-panel-oled-common.ko",
+)

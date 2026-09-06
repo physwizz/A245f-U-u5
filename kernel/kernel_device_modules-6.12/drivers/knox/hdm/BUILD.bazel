@@ -1,0 +1,41 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+
+define_mgk_ddk_ko(
+    name = "hdm",
+    srcs = [
+        "main.c",
+        "hdm_log.h"
+    ],
+	conditional_srcs = {
+        "CONFIG_UH":{
+            True:[
+                "uh_entry.S",
+                "uh.h",
+            ],
+        },
+    },
+    hdrs = [],
+    ko_deps = [
+		"//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "hdm.ko",
+)

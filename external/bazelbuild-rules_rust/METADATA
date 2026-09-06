@@ -1,0 +1,19 @@
+# This project was upgraded with external_updater.
+# Usage: tools/external_updater/updater.sh update external/bazelbuild-rules_rust
+# For more info, check https://cs.android.com/android/platform/superproject/main/+/main:tools/external_updater/README.md
+
+name: "bazelbuild-rules_rust"
+description: "Bazel rules for building Rust code."
+third_party {
+  license_type: NOTICE
+  last_upgrade_date {
+    year: 2024
+    month: 8
+    day: 15
+  }
+  identifier {
+    type: "Git"
+    value: "https://github.com/bazelbuild/rules_rust"
+    version: "0.49.3"
+  }
+}

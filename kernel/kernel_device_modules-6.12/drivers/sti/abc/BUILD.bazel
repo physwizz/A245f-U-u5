@@ -1,0 +1,87 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+
+define_mgk_ddk_ko(
+    name = "abc",
+    srcs = [
+    ],
+
+    hdrs = [
+	],
+
+    conditional_srcs = {
+        "CONFIG_SEC_ABC_COMMON":{
+            True:[
+                "abc_common.c",
+                "abc_spec_manager.c",
+            ],
+        },
+        "CONFIG_SEC_ABC_SPEC_TYPE1":{
+            True:[
+                "abc_spec_manager_type1.c",
+            ],
+        },
+        "CONFIG_SEC_ABC_MOTTO":{
+            True:[
+                "abc_motto.c",
+            ],
+        },
+    },
+
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    
+    ko_deps = ["//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version)],
+
+    out = "abc.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "abc_hub",
+    srcs = [
+    ],
+
+    hdrs = [
+	],
+
+    conditional_srcs = {
+        "CONFIG_SEC_ABC_HUB_CORE":{
+            True:[
+                "abc_hub_core.c",
+            ],
+        },
+        "CONFIG_SEC_ABC_HUB_BOOTC":{
+            True:[
+                "abc_hub_bootc.c",
+            ],
+        },
+    },
+
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/sti/abc:abc".format(kernel_version),
+    ],
+
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+
+    out = "abc_hub.ko",
+)

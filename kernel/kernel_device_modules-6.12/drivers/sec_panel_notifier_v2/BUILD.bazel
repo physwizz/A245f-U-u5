@@ -1,0 +1,32 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sec-panel-notifier-v2",
+    srcs = [
+        "sec_panel_notifier_v2.c",
+    ],
+    hdrs = [
+    ],
+    ko_deps = [
+    ],
+    copts = [
+    ],
+    out = "sec-panel-notifier-v2.ko",
+)

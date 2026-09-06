@@ -1,0 +1,205 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+load("//kernel_device_modules-6.12:lego.bzl", "lego_module_list")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "**/Makefile",
+        "**/Kbuild",
+        "**/*.c",
+        "**/*.h",
+    ]),
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+## ddk ko
+
+# isp6s
+define_mgk_ddk_ko(
+    name = "imgsensor_isp6s",
+    srcs = [
+        "common/v1_1/imgsensor.c",
+        "common/v1_1/imgsensor_hw.c",
+        "common/v1_1/imgsensor_i2c.c",
+        "common/v1_1/imgsensor_legacy.c",
+        "common/v1_1/imgsensor_proc.c",
+        #"common/v1_1/imgsensor_pwr_seq.c",
+        #"common/v1_1/imgsensor_sensor_list.c",
+        #"common/v1_1/imgsensor_ca.c",
+        "common/v1_1/seninf_clk.c",
+        "common/v1_1/seninf.c",
+    ] + [
+        "common/sysfs/imgsensor_sysfs.c",
+        "common/sysfs/imgsensor_vendor.c",
+        "common/sysfs/crc32.c",
+        "common/sysfs/imgsensor_vendor_rom_config.c",
+        "common/sysfs/imgsensor_otp_cal.c",
+        #"common/sysfs/imgsensor_vendor_rom_config_default.c",
+    ] + [
+        "common/v1_1/n3d_fsync/n3d.c",
+        "common/v1_1/n3d_fsync/n3d_clk.c",
+        "common/v1_1/n3d_fsync/n3d_hw.c",
+        "common/v1_1/n3d_fsync/vsync_recorder.c",
+        "common/v1_1/n3d_fsync/frame-sync/frame_sync.c",
+        "common/v1_1/n3d_fsync/frame-sync/frame_sync_algo.c",
+        "common/v1_1/n3d_fsync/frame-sync/frame_monitor.c",
+    ] + [
+        "common/v1_1/camera_hw/gpio/gpio.c",
+        "common/v1_1/camera_hw/regulator/regulator.c",
+        "common/v1_1/camera_hw/mclk/mclk.c",
+    ] + [
+        "isp6s/seninf/seninf_impl.c",
+        # "isp6s/camera_hw/imgsensor_oc.c",
+    ],  # Build subdrivers
+    conditional_srcs = {
+      "CONFIG_CAMERA_AAX_V15": {
+        True: glob([
+          "isp6s/camera_project/aax_v15/*.c",
+          "common/sysfs/aax_v15/*.c",
+          "common/v1_1/hi5022q_mipi_raw/*.c",
+          "common/v1_1/s5kjn1_mipi_raw/*.c",
+          "common/v1_1/gc13a0_mipi_raw/*.c",
+          "common/v1_1/sc501cs_mipi_raw/*.c",
+          "common/v1_1/gc02m2_mipi_raw/*.c",
+        ]),
+      },
+      "CONFIG_CAMERA_AAX_V16": {
+        True: glob([
+          "isp6s/camera_project/aax_v16/*.c",
+          "common/sysfs/aax_v16/*.c",
+          "common/v1_1/s5kjn1_mipi_raw/*.c",
+          "common/v1_1/gc13a0_mipi_raw/*.c",
+          "common/v1_1/sc501cs_mipi_raw/*.c",
+          "common/v1_1/gc02m1_mipi_raw/*.c",
+        ]),
+      },
+      "CONFIG_CAMERA_AAY_V17": {
+        True: glob([
+          "isp6s/camera_project/aay_v17/*.c",
+          "common/sysfs/aay_v17/*.c",
+          "common/v1_1/s5kjn1_mipi_raw/*.c",
+          "common/v1_1/gc13a0_mipi_raw/*.c",
+          "common/v1_1/sc501cs_mipi_raw/*.c",
+          "common/v1_1/gc02m1_mipi_raw/*.c",
+        ]),
+      },
+      "CONFIG_CAMERA_AAW_V24": {
+        True: glob([
+          "isp6s/camera_project/aaw_v24/*.c",
+          "common/sysfs/aaw_v24/*.c",
+          "common/v1_1/s5kjn1_mipi_raw/*.c",
+          "common/v1_1/imx258_mipi_raw/*.c",
+          "common/v1_1/hi1339_mipi_raw/*.c",
+          "common/v1_1/gc5035_mipi_raw/*.c",
+          "common/v1_1/gc02m1_mipi_raw/*.c",
+        ]),
+      },
+      "CONFIG_CAMERA_ADAPTIVE_MIPI": {
+        True: [
+          "common/adaptive_mipi/imgsensor_adaptive_mipi.c",
+        ],
+      },
+    },
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/clk/mediatek:clk-common".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/drb:drb".format(kernel_version),
+    ] + ([
+        "//kernel_device_modules-{}/drivers/misc/mediatek/cam_buckboost:cam_bb_max77816".format(kernel_version),
+    ] if "drivers/misc/mediatek/cam_buckboost/cam_bb_max77816.ko" in lego_module_list else [])+ ([
+        "//kernel_device_modules-{}/drivers/knox/kg:kg_drv".format(kernel_version),
+    ] if "drivers/knox/kg/kg_drv.ko" in lego_module_list else []),
+    header_deps = [
+        "//kernel_device_modules-{}/drivers/misc/mediatek/imgsensor:imgsensor_kd_header".format(kernel_version),
+    ],
+    hdrs = glob([
+        "**/*.h"
+    ]),
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/include/mt-plat",
+        "-I$(DEVICE_MODULES_PATH)/drivers/i2c/busses",
+        "-I$(srctree)/drivers/thermal",
+    ],
+    includes = [
+        ".",
+        "common/v1_1",
+        "common/v1_1/camera_hw",
+        "common/v1_1/camera_hw/gpio",
+        "common/v1_1/camera_hw/regulator",
+        "common/v1_1/camera_hw/mclk",
+        "common/v1_1/n3d_fsync",
+        "common/sysfs",
+        "isp6s/camera_hw",
+        "isp6s/seninf",
+    ],
+    local_defines = [
+        # "SENSOR_PARALLEISM",
+        "NO_I2C_MTK",
+        "NO_CLK_METER",
+        "SENINF_USE_RPM",
+        "DFS_CTRL_BY_OPP",
+        "SENINF_N3D_SUPPORT",
+    ],
+)
+# isp4_t
+
+define_mgk_ddk_ko(
+    name = "imgsensor_isp4_t",
+    srcs = [
+        "common/v1/imgsensor.c",
+        "common/v1/imgsensor_hw.c",
+        "common/v1/imgsensor_i2c.c",
+        "common/v1/imgsensor_legacy.c",
+        "common/v1/imgsensor_proc.c",
+        "common/v1/imgsensor_sensor_list.c",
+    ] + glob([
+        "isp4_t/camera_hw/*.c",
+        "isp4_t/camera_hw/**/*.c",
+    ]) + [
+        "isp4_t/imgsensor_clk.c",
+    ],  # Build subdrivers
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/clk/mediatek:clk-common".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/aee/aed:aee_aed".format(kernel_version),
+    ],
+    header_deps = [
+        "//kernel_device_modules-{}/drivers/misc/mediatek/imgsensor:imgsensor_kd_header".format(kernel_version),
+    ],
+    hdrs = glob([
+        "**/*.h"
+    ]),
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/include",
+        "-I$(DEVICE_MODULES_PATH)/drivers/misc/mediatek/include/mt-plat",
+        "-I$(DEVICE_MODULES_PATH)/drivers/i2c/busses",
+    #    "-I$(srctree)/drivers/thermal",
+    ],
+    includes = [
+        ".",
+        "common/v1",
+        "isp4_t",
+        "isp4_t/camera_hw",
+    ],
+    local_defines = [
+        "NO_I2C_MTK",
+        "NO_CLK_METER",
+        "IMGSENSOR_USE_RPM",
+        "IMGSENSOR_DFS_CTRL_ENABLE",
+        "SENINF_USE_WAKE_LOCK",
+        "IMGSENSOR_ISP4_T_REF",
+    ],
+)
+

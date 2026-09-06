@@ -1,0 +1,46 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sec_switch_class",
+    srcs = [
+        "switch_class.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "sec_switch_class.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec_switch_gpio",
+    srcs = [
+        "switch_gpio.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+		"//kernel_device_modules-{}/drivers/staging/android/switch:sec_switch_class".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "sec_switch_gpio.ko",
+)

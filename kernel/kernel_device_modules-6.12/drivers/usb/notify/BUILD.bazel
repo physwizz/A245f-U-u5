@@ -1,0 +1,84 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("@mgk_info//:kernel_version.bzl",
+     "kernel_version",
+     )
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+filegroup(
+    name = "ddk_src",
+    srcs = glob([
+        "**/*.c",
+        "**/*.h",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "usb_notify_layer",
+    srcs = [
+        "usb_notify.c",
+        "usb_notify_sysfs.c",
+        "dock_notify.c",
+        "usblog_proc_notify.c",
+    ],
+    conditional_srcs = {
+        "CONFIG_USB_HOST_NOTIFY":{
+            True:[
+                "host_notify_class.c",
+            ],
+        },
+		"CONFIG_USB_EXTERNAL_NOTIFY":{
+            True:[
+                "external_notify.c",
+            ],
+        },
+		"CONFIG_USB_NOTIFY_PROC_LOG":{
+            True:[
+                "usblog_proc_notify.c",
+            ],
+        },
+    },
+    hdrs = glob(["**/*.h"]),
+    includes = ["."],
+    copts = [
+    ],
+    header_deps = [
+    ],
+    ko_deps = [
+    ],
+    out = "usb_notify_layer.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "usb_notifier_module",
+    srcs = [
+        "usb_notifier.c",
+    ],
+    hdrs = glob(["**/*.h"]),
+    includes = ["."],
+    copts = [
+    ],
+    header_deps = [
+    ],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/usb/notify:usb_notify_layer".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/extcon:extcon-mtk-usb".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/common/vbus_notifier:vbus_notifier_module".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/muic/common:common_muic".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/typec/common:pdic_notifier_module".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/typec/manager:usb_typec_manager".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/typec/manager:if_cb_manager_module".format(kernel_version),
+    ],
+    out = "usb_notifier_module.ko",
+)

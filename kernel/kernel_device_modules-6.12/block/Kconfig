@@ -1,0 +1,41 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Block layer core configuration
+#
+
+if BLOCK
+
+config BLK_SEC_COMMON
+	tristate "Samsung specific module in block layer"
+	default n
+	help
+	  Say Y here if you want to be enable samsung specific module
+	  in block layer.
+
+config BLK_SEC_STATS
+	tristate "Samsung statistics module in block layer"
+	default n
+	select BLK_SEC_COMMON
+	help
+	  Say Y here if you want to be enable samsung statistics module
+	  in block layer.
+
+config BLK_SEC_WB
+	tristate "Samsung Write Booster module in block layer"
+	default n
+	select BLK_SEC_COMMON
+	help
+	  Say Y here if you want to be enable samsung write booster module
+	  in block layer.
+
+config BLK_SEC_HCGC
+	tristate "Samsung Host Controlled GC in block layer"
+	default n
+	select BLK_SEC_COMMON
+	help
+	  Say Y here if you want to be enable samsung write booster module
+	  in block layer.
+
+source "$(KCONFIG_EXT_PREFIX)block/Kconfig.iosched"
+
+endif # BLOCK

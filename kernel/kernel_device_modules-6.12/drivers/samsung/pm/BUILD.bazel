@@ -1,0 +1,45 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+        "**/Kconfig.arm",
+    ]),
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "**/Makefile",
+        "**/Kbuild",
+        "**/*.c",
+        "**/*.h",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sec_pm_debug",
+    hdrs = glob(["**/*.h"]),
+    includes = ["."],
+    srcs = [
+        "sec_pm_debug.c",
+    ],
+    out = "sec_pm_debug.ko"
+)
+
+define_mgk_ddk_ko(
+    name = "sec_wakeup_cpu_allocator",
+    hdrs = glob(["**/*.h"]),
+    includes = ["."],
+    srcs = [
+        "sec_wakeup_cpu_allocator.c",
+    ],
+    out = "sec_wakeup_cpu_allocator.ko"
+)

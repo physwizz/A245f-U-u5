@@ -1,0 +1,36 @@
+load("@mgk_info//:kernel_version.bzl",
+     "kernel_version",
+)
+
+product_device_modules_srcs = [
+    # keep sorted
+    # "//kernel_device_modules-{}/drivers/samsung:ddk_srcs".format(kernel_version),
+    # "//kernel_device_modules-{}/drivers/samsung/debug:ddk_srcs".format(kernel_version),
+    "//kernel_device_modules-{}/sound/soc/codecs/aw882xx:srcs".format(kernel_version),
+    "//kernel_device_modules-{}/sound/soc/samsung:srcs".format(kernel_version),
+    "//kernel_device_modules-{}/drivers/gpu/drm/panel/mcd_panel:srcs".format(kernel_version),
+]
+
+product_device_modules_kconfig = [
+    # "//kernel_device_modules-{}/drivers/samsung:ddk_kconfigs".format(kernel_version),
+    # "//kernel_device_modules-{}/drivers/samsung/debug:ddk_kconfigs".format(kernel_version),
+    "//kernel_device_modules-{}/sound/soc/codecs/aw882xx:ddk_kconfigs".format(kernel_version),
+    "//kernel_device_modules-{}/sound/soc/samsung:ddk_kconfigs".format(kernel_version),
+]
+
+product_device_modules = [
+    # "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+    # "//kernel_device_modules-{}/drivers/samsung/sec_reboot".format(kernel_version),
+    "//kernel_device_modules-{}/sound/soc/codecs/aw882xx:snd-soc-aw882xx".format(kernel_version),
+    "//kernel_device_modules-{}/sound/soc/samsung:snd-soc-sec-audio".format(kernel_version),
+    "//kernel_device_modules-{}/drivers/leds:leds-sm5714-fled".format(kernel_version),
+    "//kernel_device_modules-{}/drivers/misc/mediatek/flashlight:flashlights-sm5714".format(kernel_version),
+    "//kernel_device_modules-{}/drivers/gpu/drm/panel/mcd_panel:mcd_panel_adapter".format(kernel_version),
+    "//kernel_device_modules-{}/drivers/samsung/pm:sec_wakeup_cpu_allocator".format(kernel_version),
+]
+
+product_gki_modules = [
+    # "drivers/watchdog/softdog.ko",
+    "drivers/i2c/algos/i2c-algo-bit.ko",
+    "drivers/i2c/busses/i2c-gpio.ko",
+]

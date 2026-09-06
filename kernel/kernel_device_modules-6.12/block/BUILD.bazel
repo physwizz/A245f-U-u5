@@ -1,0 +1,91 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+	default_visibility = [
+		"//visibility:public",
+	],
+)
+
+filegroup(
+	name = "ddk_kconfigs",
+	srcs = glob([
+		"**/Kconfig",
+		"**/Kconfig.iosched",
+	]),
+)
+
+define_mgk_ddk_ko(
+	name = "blk-sec-common",
+	srcs = [
+		"blk-sec-common.c",
+	],
+	hdrs = ["blk-sec.h"],
+	ko_deps = [
+		"//kernel_device_modules-{}/drivers/ufs:ufs_sec".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+	],
+	copts = [
+		"-I$(DEVICE_MODULES_PATH)/drivers/ufs/vendor/"
+	],
+	out = "blk-sec-common.ko",
+)
+
+define_mgk_ddk_ko(
+	name = "blk-sec-stats",
+	srcs = [
+		"blk-sec-stat-pio.c",
+		"blk-sec-stat-traffic.c",
+		"blk-sec-stat.c",
+	],
+	ko_deps = [
+		":blk-sec-common",
+	],
+	copts = [
+	],
+	out = "blk-sec-stats.ko",
+)
+
+define_mgk_ddk_ko(
+	name = "blk-sec-wb",
+	srcs = [
+		"blk-sec-wb.c",
+	],
+	ko_deps = [
+		"//kernel_device_modules-{}/block:blk-sec-common".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/ufs:ufs_sec".format(kernel_version),
+	],
+	copts = [
+		"-I$(DEVICE_MODULES_PATH)/drivers/ufs/vendor/"
+	],
+	out = "blk-sec-wb.ko",
+)
+
+define_mgk_ddk_ko(
+	name = "ssg",
+	srcs = [
+		"ssg-iosched.c",
+		"ssg-stat.c",
+	],
+	hdrs = ["ssg.h"],
+	conditional_srcs = {
+		"CONFIG_MQ_IOSCHED_SSG_CGROUP": {
+			True: [
+				"ssg-cgroup.c",
+			],
+		},
+		"CONFIG_MQ_IOSCHED_SSG_WB": {
+			True: [
+				"ssg-wb.c",
+			],
+		},
+	},
+	ko_deps = [
+		":blk-sec-common",
+		":blk-sec-stats",
+		":blk-sec-wb",
+	],
+	copts = [
+	],
+	out = "ssg.ko",
+)

@@ -1,0 +1,47 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sm5714_pdic",
+    srcs = [
+        "sm5714_typec.c",
+    ],
+    conditional_srcs = {
+        "CONFIG_BATTERY_SAMSUNG":{
+            True:[
+                "sm5714_policy.c",
+				"sm5714_pd.c",
+            ],
+        },
+    },
+    hdrs = glob(["**/*.h"]),
+    ko_deps = [
+		"//kernel_device_modules-{}/drivers/usb/typec/common:pdic_notifier_module".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/notify:usb_notify_layer".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/common/vbus_notifier:vbus_notifier_module".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/mfd/sm/sm5714:mfd_sm5714".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/typec/manager:usb_typec_manager".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/usb/typec/manager:if_cb_manager_module".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/muic/common:common_muic".format(kernel_version),
+		"//kernel_device_modules-{}/drivers/battery/common:sec_pd".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/battery/charger/sm5714_charger:sm5714-charger".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+     out = "sm5714_pdic.ko",
+)   

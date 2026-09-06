@@ -1,0 +1,22 @@
+{
+    "homepage": "https://github.com/google/riegeli",
+    "maintainers": [
+        {
+            "email": "qrczak@google.com",
+            "github": "QrczakMK",
+            "name": "Marcin Kowalczyk"
+        }
+    ],
+    "repository": [
+        "github:google/riegeli"
+    ],
+    "versions": [
+        "0.0.0-20231123-411cda7",
+        "0.0.0-20231123-411cda7.bcr.1",
+        "0.0.0-20240606-973b6f0",
+        "0.0.0-20240927-cdfb25a"
+    ],
+    "yanked_versions": {
+        "0.0.0-20231123-411cda7": "use riegeli@0.0.0-20231123-411cda7.bcr.1 instead"
+    }
+}

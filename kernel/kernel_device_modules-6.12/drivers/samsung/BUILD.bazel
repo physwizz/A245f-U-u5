@@ -1,0 +1,87 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "sec_ext",
+    srcs = [
+        "sec_extention.c",
+        "sec_class.c",
+        "sec_chipid.c",
+    ],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_ext.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec_reset",
+    srcs = [
+        "sec_key_notifier.c",
+        "sec_crash_key.c",
+        "sec_crash_key_user.c",
+        "sec_hard_reset_hook.c",
+    ],
+    hdrs = glob([
+            "sec_key_notifier.h",
+    ]),
+    includes = ["."],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/misc/mediatek/aee/mrdump:mrdump".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/input/keyboard:mtk-pmic-keys".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_reset.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec_reboot",
+    srcs = [
+        "sec_reboot.c",
+    ],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/misc/mediatek/aee/mrdump:mrdump".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_reboot.ko",
+)
+
+define_mgk_ddk_ko(
+    name = "sec_bootstat",
+    srcs = [
+        "sec_bootstat.c",
+    ],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung:sec_ext".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "sec_bootstat.ko",
+)
+
+
+

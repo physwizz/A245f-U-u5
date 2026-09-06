@@ -1,0 +1,82 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko")
+load("@mgk_info//:kernel_version.bzl","kernel_version",)
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+filegroup(
+    name = "srcs",
+    srcs = glob([
+        "**/Kbuild",
+        "**/*.c",
+        "**/*.h",
+    ]),
+)
+
+define_mgk_ddk_ko(
+    name = "zram",
+    srcs = [
+        "zcomp.c",
+        "zram_drv.c",
+    ],
+    conditional_srcs = {
+        "CONFIG_ZRAM_BACKEND_LZO":{
+            True:[
+                "backend_lzorle.c",
+                "backend_lzo.c",
+            ],
+        },
+        "CONFIG_ZRAM_BACKEND_LZ4":{
+            True:[
+                "backend_lz4.c",
+            ],
+        },
+        "CONFIG_ZRAM_BACKEND_LZ4HC":{
+            True:[
+                "backend_lz4hc.c",
+            ],
+        },
+        "CONFIG_ZRAM_BACKEND_ZSTD":{
+            True:[
+                "backend_zstd.c",
+            ],
+        },
+        "CONFIG_ZRAM_BACKEND_DEFLATE":{
+            True:[
+                "backend_deflate.c",
+            ],
+        },
+        "CONFIG_ZRAM_BACKEND_842":{
+            True:[
+                "backend_842.c",
+            ],
+        },
+        "CONFIG_ZRAM_EXT": {
+            True: [
+                "madvise.c",
+                "zram_ext.c",
+            ],
+        },
+    },
+    hdrs = glob(["**/*.h"]),
+    includes = ["."],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+        "//kernel_device_modules-{}/mm/sec_mm:sec_mm".format(kernel_version),
+    ],
+    copts = [
+        "-I$(srctree)/mm",
+        "-I$(srctree)/$(src)",
+        "-I$(DEVICE_MODULES_PATH)/include/linux",
+    ],
+)

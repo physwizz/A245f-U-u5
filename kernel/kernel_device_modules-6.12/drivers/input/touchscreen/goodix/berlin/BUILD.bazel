@@ -1,0 +1,55 @@
+load("//build/bazel_mgk_rules:mgk_ddk_ko.bzl", "define_mgk_ddk_ko",)
+load("//build/kernel/kleaf:kernel.bzl", "ddk_headers")
+load("@mgk_info//:kernel_version.bzl", "kernel_version")
+
+package(
+    default_visibility = [
+        "//visibility:public",
+    ],
+)
+
+filegroup(
+    name = "ddk_kconfigs",
+    srcs = glob([
+        "**/Kconfig",
+    ]),
+)
+
+
+
+define_mgk_ddk_ko(
+    name = "berlin",
+    srcs = [
+        "goodix_ts_utils.c",
+        "goodix_ts_tools.c",
+        "goodix_ts_inspect.c",
+        "goodix_ts_gesture.c",
+        "goodix_ts_core.c",
+        "goodix_ts_cmd.c",
+        "goodix_cfg_bin.c",
+        "goodix_brl_i2c.c",
+        "goodix_brl_hw.c",
+        "goodix_brl_fwupdate.c"
+    ],
+
+    hdrs = [
+        "goodix_ts_core.h",
+    ],
+    ko_deps = [
+        "//kernel_device_modules-{}/drivers/samsung/debug:sec_debug".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/input/sec_input:sec_common_fn".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/input/sec_input:sec_input_notifier".format(kernel_version),	
+        "//kernel_device_modules-{}/drivers/usb/typec/manager:usb_typec_manager".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/usb/common/vbus_notifier:vbus_notifier_module".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/tee/tui:tuihw-inf".format(kernel_version),
+        "//kernel_device_modules-{}/drivers/i2c/busses:i2c-mt65xx".format(kernel_version),
+    ],
+    header_deps = [
+ 
+    ],
+    copts = [
+        "-I$(DEVICE_MODULES_PATH)/include/",
+    ],
+    out = "goodix_ts_berlin.ko",
+)
+
